@@ -4,6 +4,8 @@ import io.github.shanastasia06.bookcatalog.dto.AuthorResponseDto;
 import io.github.shanastasia06.bookcatalog.dto.PublisherRequestDto;
 import io.github.shanastasia06.bookcatalog.dto.PublisherResponseDto;
 import io.github.shanastasia06.bookcatalog.entity.Publisher;
+import io.github.shanastasia06.bookcatalog.exception.EntityAlreadyExistsException;
+import io.github.shanastasia06.bookcatalog.exception.EntityNotFoundException;
 import io.github.shanastasia06.bookcatalog.mapper.PublisherMapper;
 import io.github.shanastasia06.bookcatalog.repository.PublisherRepository;
 import lombok.RequiredArgsConstructor;
@@ -43,14 +45,14 @@ public class PublisherService {
 
     public PublisherResponseDto findById(Long id) {
         Publisher publisher = publisherRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Издатель с ID " + id + " не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Издатель с ID " + id + " не найден"));
         return publisherMapper.toDto(publisher);
     }
 
     @Transactional
     public PublisherResponseDto create(PublisherRequestDto publisherRequestDto) {
         if (publisherRepository.existsByNameIgnoreCase(publisherRequestDto.name())) {
-            throw new RuntimeException("Издатель с таким именем уже существует");
+            throw new EntityAlreadyExistsException("Издатель с таким именем уже существует");
         }
         Publisher publisher = publisherMapper.toEntity(publisherRequestDto);
         Publisher savedPublisher = publisherRepository.save(publisher);
@@ -60,11 +62,11 @@ public class PublisherService {
     @Transactional
     public PublisherResponseDto update(Long id, PublisherRequestDto publisherRequestDto) {
         Publisher existingPublisher = publisherRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Издатель с ID " + id + " не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Издатель с ID " + id + " не найден"));
 
         if (!existingPublisher.getName().equalsIgnoreCase(publisherRequestDto.name())
                 && publisherRepository.existsByNameIgnoreCase(publisherRequestDto.name())) {
-            throw new RuntimeException("Издатель с таким именем уже существует");
+            throw new EntityAlreadyExistsException("Издатель с таким именем уже существует");
         }
 
         existingPublisher.setName(publisherRequestDto.name());
@@ -76,7 +78,7 @@ public class PublisherService {
     @Transactional
     public void delete(Long id) {
         if (!publisherRepository.existsById(id)) {
-            throw new RuntimeException("Издательство с ID " + id + " не найдено");
+            throw new EntityNotFoundException("Издательство с ID " + id + " не найдено");
         }
         publisherRepository.deleteById(id);
     }

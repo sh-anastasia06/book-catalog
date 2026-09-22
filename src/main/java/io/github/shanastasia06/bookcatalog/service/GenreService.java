@@ -3,6 +3,8 @@ package io.github.shanastasia06.bookcatalog.service;
 import io.github.shanastasia06.bookcatalog.dto.GenreRequestDto;
 import io.github.shanastasia06.bookcatalog.dto.GenreResponseDto;
 import io.github.shanastasia06.bookcatalog.entity.Genre;
+import io.github.shanastasia06.bookcatalog.exception.EntityAlreadyExistsException;
+import io.github.shanastasia06.bookcatalog.exception.EntityNotFoundException;
 import io.github.shanastasia06.bookcatalog.mapper.GenreMapper;
 import io.github.shanastasia06.bookcatalog.repository.GenreRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,14 +36,14 @@ public class GenreService {
 
     public GenreResponseDto findById(Long id) {
         Genre genre = genreRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Жанр с ID " + id + " не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Жанр с ID " + id + " не найден"));
         return genreMapper.toDto(genre);
     }
 
     @Transactional
     public GenreResponseDto create(GenreRequestDto genreRequestDto) {
         if (genreRepository.existsByNameIgnoreCase(genreRequestDto.name())) {
-            throw new RuntimeException("Жанр '" + genreRequestDto.name() + "' уже существует");
+            throw new EntityAlreadyExistsException("Жанр '" + genreRequestDto.name() + "' уже существует");
         }
         Genre genre = genreMapper.toEntity(genreRequestDto);
         return genreMapper.toDto(genreRepository.save(genre));
@@ -50,11 +52,11 @@ public class GenreService {
     @Transactional
     public GenreResponseDto update(Long id, GenreRequestDto genreRequestDto) {
         Genre existingGenre = genreRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Жанр с ID " + id + " не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Жанр с ID " + id + " не найден"));
 
         if (!existingGenre.getName().equalsIgnoreCase(genreRequestDto.name())
                 && genreRepository.existsByNameIgnoreCase(genreRequestDto.name())) {
-            throw new RuntimeException("Жанр '" + genreRequestDto.name() + "' уже существует");
+            throw new EntityAlreadyExistsException("Жанр '" + genreRequestDto.name() + "' уже существует");
         }
 
         existingGenre.setName(genreRequestDto.name());
@@ -65,7 +67,7 @@ public class GenreService {
     @Transactional
     public void delete(Long id) {
         if (!genreRepository.existsById(id)) {
-            throw new RuntimeException("Жанр с ID " + id + " не найден");
+            throw new EntityNotFoundException("Жанр с ID " + id + " не найден");
         }
         genreRepository.deleteById(id);
     }

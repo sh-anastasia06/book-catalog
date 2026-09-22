@@ -3,6 +3,7 @@ package io.github.shanastasia06.bookcatalog.service;
 import io.github.shanastasia06.bookcatalog.dto.AuthorRequestDto;
 import io.github.shanastasia06.bookcatalog.dto.AuthorResponseDto;
 import io.github.shanastasia06.bookcatalog.entity.Author;
+import io.github.shanastasia06.bookcatalog.exception.EntityNotFoundException;
 import io.github.shanastasia06.bookcatalog.mapper.AuthorMapper;
 import io.github.shanastasia06.bookcatalog.repository.AuthorRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +42,7 @@ public class AuthorService {
 
     public AuthorResponseDto findById(Long id) {
         Author author = authorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Автор с ID " + id + " не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Автор с ID " + id + " не найден"));
         return authorMapper.toDto(author);
     }
 
@@ -55,7 +56,7 @@ public class AuthorService {
     @Transactional
     public AuthorResponseDto update(Long id, AuthorRequestDto authorRequestDto) {
         Author existingAuthor = authorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Автор с ID " + id + " не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Автор с ID " + id + " не найден"));
 
         existingAuthor.setFirstName(authorRequestDto.firstName());
         existingAuthor.setLastName(authorRequestDto.lastName());
@@ -67,7 +68,7 @@ public class AuthorService {
     @Transactional
     public void delete(Long id) {
         if (!authorRepository.existsById(id)) {
-            throw new RuntimeException("Автор с ID " + id + " не найден");
+            throw new EntityNotFoundException("Автор с ID " + id + " не найден");
         }
         authorRepository.deleteById(id);
     }
