@@ -20,6 +20,8 @@ public interface PublisherRepository extends JpaRepository<Publisher,Long> {
 
     List<Publisher> findByCountryContainingIgnoreCase(String countryKeyword);
 
+    List<Publisher> findByNameContainingIgnoreCaseAndCountryContainingIgnoreCase(String nameKeyword, String countryKeyword);
+
     @Query("SELECT DISTINCT p FROM Publisher p " +
             "LEFT JOIN FETCH p.books " +
             "WHERE p.id = :id")
